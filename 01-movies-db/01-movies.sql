@@ -63,3 +63,106 @@ SELECT MAX(imdb_rating) as max_rating,
 	MIN(imdb_rating) as min_rating,
 	ROUND(AVG(imdb_rating), 2) as avg_rating 
 FROM moviesdb.movies WHERE studio="Marvel Studios";
+
+SELECT industry, COUNT(*) 
+FROM moviesdb.movies 
+GROUP BY industry;
+SELECT studio, COUNT(*) 
+FROM moviesdb.movies 
+GROUP BY studio;
+SELECT studio, COUNT(*) as cnt
+FROM moviesdb.movies 
+GROUP BY studio
+ORDER BY cnt DESC;
+
+SELECT 
+	industry, 
+    COUNT(industry) as cnt,
+    ROUND(AVG(imdb_rating), 2) as avg_rating
+FROM moviesdb.movies 
+GROUP BY industry;
+SELECT 
+	studio, 
+    COUNT(studio) as cnt,
+    ROUND(AVG(imdb_rating), 1) as avg_rating
+FROM moviesdb.movies 
+GROUP BY studio
+ORDER BY avg_rating DESC;
+SELECT 
+	studio, 
+    COUNT(studio) as cnt,
+    ROUND(AVG(imdb_rating), 1) as avg_rating
+FROM moviesdb.movies 
+WHERE studio != ""
+GROUP BY studio
+ORDER BY avg_rating DESC;
+
+SELECT release_year, COUNT(*) as movies_count
+FROM moviesdb.movies
+-- WHERE movies_count > 2
+GROUP BY release_year
+ORDER BY movies_count DESC;
+SELECT release_year, COUNT(*) as movies_count
+FROM moviesdb.movies
+GROUP BY release_year
+HAVING movies_count > 2
+ORDER BY movies_count DESC;
+
+SELECT * FROM moviesdb.actors;
+SELECT CURDATE();
+SELECT *, CURDATE()
+FROM moviesdb.actors;
+SELECT *, YEAR(CURDATE())-birth_year as age
+FROM moviesdb.actors;
+
+SELECT * FROM moviesdb.financials;
+SELECT *, (revenue - budget) as profit
+FROM moviesdb.financials;
+
+SELECT distinct currency FROM moviesdb.financials;
+SELECT *, 
+IF(currency = 'USD', revenue * 83.95, revenue) as revenue_inr
+FROM moviesdb.financials;
+
+SELECT distinct unit FROM moviesdb.financials;
+SELECT *, 
+CASE
+    WHEN unit = 'Billions' THEN revenue * 1000
+    WHEN unit = 'Thousands' THEN revenue / 1000
+    ELSE revenue
+END as revenue_mils
+FROM moviesdb.financials;
+
+SELECT 
+    *,
+    (CASE
+        WHEN unit = 'Billions' THEN revenue * 1000
+        WHEN unit = 'Thousands' THEN revenue / 1000
+        ELSE revenue
+    END) AS revenue_mils,
+    IF(currency = 'USD', 
+        (CASE
+            WHEN unit = 'Billions' THEN revenue * 1000 * 83.95
+            WHEN unit = 'Thousands' THEN revenue / 1000 * 83.95
+            ELSE revenue * 83.95
+        END), 
+        (CASE
+            WHEN unit = 'Billions' THEN revenue * 1000
+            WHEN unit = 'Thousands' THEN revenue / 1000
+            ELSE revenue
+        END)
+    ) AS revenue_inr_mils,
+    (IF(currency = 'USD', 
+        (CASE
+            WHEN unit = 'Billions' THEN (revenue - budget) * 1000 * 83.95
+            WHEN unit = 'Thousands' THEN (revenue - budget) / 1000 * 83.95
+            ELSE (revenue - budget) * 83.95
+        END), 
+        (CASE
+            WHEN unit = 'Billions' THEN (revenue - budget) * 1000
+            WHEN unit = 'Thousands' THEN (revenue - budget) / 1000
+            ELSE (revenue - budget)
+        END)
+    )) AS profit_inr_mils
+FROM 
+    moviesdb.financials;
